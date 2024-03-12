@@ -22,6 +22,7 @@ int main(){
         }
         cout<<endl;
         cout<<hell;
+        cout<<commit lan 2;
     }
     return 0;
 }
