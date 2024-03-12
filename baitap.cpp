@@ -21,7 +21,6 @@ int main(){
             }
         }
         cout<<endl;
-        cout<<hello;
     }
     return 0;
 }
