@@ -1,0 +1,138 @@
+// bullet
+using UnityEngine;
+
+public class Bullet : MonoBehaviour
+{
+
+    public float speed = 10f;
+
+    void Start()
+    {
+        Rigidbody2D rigidBody = GetComponent<Rigidbody2D>();
+        rigidBody.linearVelocity = new Vector2(0f, speed);
+    }
+
+    void Update()
+    {
+
+    }
+    void OnCollisionEnter2D(Collision2D other)
+    {
+        Destroy(other.gameObject); // Destroy the meteor
+        Destroy(gameObject);
+    }
+}
+
+// MateoMove
+using UnityEngine;
+
+public class MateoMove : MonoBehaviour
+{
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public float speed = -2f;
+    Rigidbody2D rb;
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        rb.linearVelocity = new Vector2 (0, speed);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
+
+// mateo bound
+using UnityEngine;
+
+public class MateoBound : MonoBehaviour
+{
+    public GameObject meteo;
+    public float min = 1f, max = 3f, limit = 6f;
+
+    void Start() => Spawn();
+
+    void Spawn()
+    {
+        var pos = transform.position + Vector3.right * Random.Range(-limit, limit);
+        Instantiate(meteo, pos, Quaternion.identity);
+        Invoke(nameof(Spawn), Random.Range(min, max));
+    }
+}
+
+// map scroll
+using UnityEngine;
+
+public class Scroll : MonoBehaviour
+{
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public float speed = -2f;
+    public float lowerY = -20f;
+    public float upperY = 40f;
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        transform.Translate(0f, speed * Time.deltaTime, 0f);
+        if(transform.position.y < lowerY)
+        {
+            transform.Translate(0f, upperY, 0f);
+        }
+    }
+}
+
+// ship control
+using UnityEngine;
+
+public class ShipControl : MonoBehaviour
+{
+    public GameManager gameManager;
+    public GameObject bulletPrefab;
+    public AudioClip shootSound;
+    public AudioClip hitSound; // Âm thanh khi va chạm
+    public float speed = 10f, xLimit = 7f, yLimit = 4.5f, reloadTime = 0.5f;
+
+    float elapsedTime;
+    AudioSource audioSource;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        elapsedTime += Time.deltaTime;
+
+        float xInput = Input.GetAxis("Horizontal");
+        float yInput = Input.GetAxis("Vertical");
+        Vector3 movement = new Vector3(xInput, yInput, 0f) * speed * Time.deltaTime;
+        transform.Translate(movement);
+
+        var pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, -xLimit, xLimit);
+        pos.y = Mathf.Clamp(pos.y, -yLimit, yLimit);
+        transform.position = pos;
+
+        if (Input.GetButtonDown("Jump") && elapsedTime > reloadTime)
+        {
+            Instantiate(bulletPrefab, pos + Vector3.up * 1.2f, Quaternion.identity);
+            if (shootSound) audioSource.PlayOneShot(shootSound);
+            elapsedTime = 0f;
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (hitSound) audioSource.PlayOneShot(hitSound); // Phát âm va chạm
+        Time.timeScale = 0;
+    }
+}
+
+
